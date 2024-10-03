@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервис обработки заказов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f4f4f4;
+        }
+        header .logo {
+            width: 100px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        .auth {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin-top: 20px;
+        }
+        .left-panel, .right-panel {
+            width: 48%;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .left-panel select, .left-panel input, .left-panel button, .right-panel select, .right-panel button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .order-list, .pallet-list {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Логотип" width="100">
+        </div>
+        <h1>Название Сервиса</h1>
+        <div class="auth">
+            <button>Войти</button>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="left-panel">
+            <h2>Выбор филиала</h2>
+            <select name="branch" id="branch">
+                <option value="branch1">Филиал 1</option>
+                <option value="branch2">Филиал 2</option>
+            </select>
+
+            <h2>Номер заказа</h2>
+            <input type="text" id="order-number" placeholder="Введите или сканируйте номер заказа">
+            
+            <button id="upload-order">Загрузить</button>
+            
+            <h2>Загруженные заказы</h2>
+            <div class="order-list">
+                <ul id="order-list">
+                    <!-- Список загруженных заказов -->
+                </ul>
+            </div>
+
+            <button id="add-to-pallet">Добавить в палету</button>
+        </div>
+
+        <div class="right-panel">
+            <h2>Выбор палеты</h2>
+            <select name="pallet" id="pallet">
+                <option value="pallet1">Палета 1</option>
+                <option value="pallet2">Палета 2</option>
+            </select>
+            
+            <button id="create-pallet">Сформировать палету</button>
+            
+            <button id="finish">Завершить</button>
+            
+            <h2>Перечень товаров на палете</h2>
+            <div class="pallet-list">
+                <ul id="pallet-list">
+                    <!-- Список товаров на палете -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Список заказов и палет
+            let orders = [];
+            let palletItems = [];
+
+            // Элементы DOM
+            const orderInput = document.getElementById('order-number');
+            const orderList = document.getElementById('order-list');
+            const palletList = document.getElementById('pallet-list');
+            const uploadOrderButton = document.getElementById('upload-order');
+            const addToPalletButton = document.getElementById('add-to-pallet');
+            const finishButton = document.getElementById('finish');
+
+            // Добавить заказ в список
+            function addOrder() {
+                const orderNumber = orderInput.value.trim();
+                if (orderNumber && !orders.includes(orderNumber)) {
+                    orders.push(orderNumber);
+                    updateOrderList();
+                    orderInput.value = ''; // Очистить поле ввода
+                }
+            }
+
+            // Обновить список заказов
+            function updateOrderList() {
+                orderList.innerHTML = ''; // Очистить список
+                orders.forEach(order => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<input type="checkbox" value="${order}"> ${order}`;
+                    orderList.appendChild(li);
+                });
+            }
+
+            // Добавить отмеченные заказы в палету
+            function addToPallet() {
+                const checkedOrders = Array.from(orderList.querySelectorAll('input[type="checkbox"]:checked'));
+                checkedOrders.forEach(checkbox => {
+                    const order = checkbox.value;
+                    if (!palletItems.includes(order)) {
+                        palletItems.push(order);
+                        orders = orders.filter(o => o !== order); // Удалить из списка заказов
+                    }
+                });
+                updateOrderList();
+                updatePalletList();
+            }
+
+            // Обновить список товаров на палете
+            function updatePalletList() {
+                palletList.innerHTML = ''; // Очистить список палеты
+                palletItems.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    palletList.appendChild(li);
+                });
+            }
+
+            // Завершить работу с палетой
+            function finishPallet() {
+                if (palletItems.length > 0) {
+                    alert('Палета сформирована!');
+                    palletItems = [];
+                    updatePalletList();
+                } else {
+                    alert('Палета пуста.');
+                }
+            }
+
+            // Обработчики событий
+            uploadOrderButton.addEventListener('click', addOrder);
+            addToPalletButton.addEventListener('click', addToPallet);
+            finishButton.addEventListener('click', finishPallet);
+        });
+    </script>
+</body>
+</html>
